@@ -1,19 +1,20 @@
 let recorder, blob, uniqueId;
 const recordButton = document.getElementById("recordButton");
 const uploadButton = document.getElementById("uploadButton");
+const audioPlayback = document.getElementById("audioPlayback");
 const transcript = document.getElementById("transcript");
 const serviceURL = 'https://hyuxza302d.execute-api.us-east-1.amazonaws.com/dev'
 
 recordButton.addEventListener("click", function() {
-  if (this.innerHTML === "Record") {
+if (this.innerHTML === "Record") {
     startRecording();
-  } else {
+} else {
     stopRecording();
-  }
+}
 });
 
 uploadButton.addEventListener("click", function() {
-  uploadAudio();
+    uploadAudio();
 });
 
 let chunks = [];
@@ -38,6 +39,14 @@ function startRecording() {
             recorder.onerror = function (event) {
                 console.error('Error from MediaRecorder:', event);
             };
+
+            recorder.onstop = function (event) {
+                blob = new Blob(chunks, { 'type': 'audio/webm' });
+                chunks = [];
+              
+                const audioURL = URL.createObjectURL(blob);
+                audioPlayback.src = audioURL;
+            }
         })
         .catch(function (error) {
             console.error("MediaRecording failed: ", error);
@@ -53,10 +62,7 @@ function stopRecording() {
     uploadButton.style.backgroundColor = "blue";
 }
 
-function uploadAudio() {
-    blob = new Blob(chunks, { 'type': 'audio/webm' }); // Here the type should be 'audio/webp', but the browser MediaRecorder does not currently support 'audio/webp'
-    chunks = [];
-    
+function uploadAudio() {    
     console.log(`Audio Blob size: ${blob.size}`);
 
     fetch(`${serviceURL}/uploadURL`)

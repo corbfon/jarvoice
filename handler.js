@@ -75,8 +75,12 @@ module.exports.getUploadURL = async (event) => {
         MediaFileUri: `https://s3.${process.env.AWS_REGION}.amazonaws.com/${s3BucketName}/${s3ObjectKey}`
       },
       TranscriptionJobName: `${s3ObjectKey}-transcription`,
-      MediaFormat: 'webm', // Currently, AWS Transcribe does not support webp format for audio, use webm or other supported formats
-      OutputBucketName: 'minlab-audio-transcript-output'
+      MediaFormat: 'webm',
+      OutputBucketName: 'minlab-audio-transcript-output',
+      Settings: {
+        ShowSpeakerLabels: true,
+        MaxSpeakerLabels: 5
+      }
     };
   
     try {
