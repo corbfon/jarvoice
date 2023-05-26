@@ -105,12 +105,45 @@ module.exports.getUploadURL = async (event) => {
       // Parse the transcript JSON
       const transcriptJSON = JSON.parse(transcriptFile.Body.toString());
   
-      // Get the transcribed text
-      const transcriptText = transcriptJSON.results.transcripts[0].transcript;
+      // Get the speaker segments
+      const speakerSegments = transcriptJSON.results.speaker_labels.segments;
+  
+      // Build transcript data with speaker identification
+      let transcriptData = [];
+      let currentSpeaker = "";
+      let sentence = "";
+  
+      speakerSegments.forEach(segment => {
+        let speaker = segment.speaker_label;
+        segment.items.forEach(item => {
+          let wordTimestamp = transcriptJSON.results.items.find(wordItem => wordItem.start_time === item.start_time && wordItem.end_time === item.end_time);
+          if(wordTimestamp){
+            if (currentSpeaker !== speaker && sentence !== "") {
+              transcriptData.push({
+                speaker: currentSpeaker.replace('spk_', 'Speaker '),
+                content: `${sentence.trim()}`
+              });
+              sentence = "";
+            }
+            currentSpeaker = speaker;
+            sentence += wordTimestamp.alternatives[0].content + " ";
+          }
+        });
+      });
+  
+      // Capture the last sentence of the last speaker
+      if (sentence !== "") {
+        transcriptData.push({
+          speaker: currentSpeaker.replace('spk_', 'Speaker '),
+          content: `${sentence.trim()}`
+        });
+      }
+  
+      let formattedTranscript = transcriptData.map(data => `[${parseInt(data.speaker) + 1}]: ${data.content}`).join('\n');
   
       return {
         statusCode: 200,
-        body: JSON.stringify({ transcript: transcriptText }),
+        body: JSON.stringify({ transcript: formattedTranscript }),
         headers,
       };
     } catch (error) {
