@@ -82,7 +82,7 @@ function stopRecording() {
 function uploadAudio() {
   console.log(`Audio Blob size: ${blob.size}`);
 
-  fetch(`${serviceURL}/uploadURL`)
+  fetch(`${serviceURL}/uploadURL?file_type=${encodeURIComponent("audio/webm")}`)
     .then((response) => response.json())
     .then((data) => {
       console.log("file name", data.fileName, "size", blob.size);
