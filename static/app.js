@@ -82,7 +82,7 @@ function stopRecording() {
 function uploadAudio() {
   console.log(`Audio Blob size: ${blob.size}`);
 
-  fetch(`${serviceURL}/uploadURL?file_type=${encodeURIComponent("audio/webm")}`)
+  fetch(`${serviceURL}/uploadURL?file_extension=m4a`)
     .then((response) => response.json())
     .then((data) => {
       console.log("file name", data.fileName, "size", blob.size);
@@ -101,8 +101,11 @@ function uploadAudio() {
     .catch((error) => console.error("Error uploading file:", error));
 }
 
-function uploadFile() {
-  fetch(`${serviceURL}/uploadURL`)
+function uploadFile(fileName) {
+  const uploadFileButton = document.getElementById("fileInput");
+  const file = uploadFileButton.files[0];
+  const fileExtension = file.name.split(".").pop();
+  fetch(`${serviceURL}/uploadURL?file_extension=${fileExtension}`)
     .then((response) => response.json())
     .then((data) => {
       uniqueId = data.fileName;

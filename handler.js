@@ -11,25 +11,25 @@ const headers = {
 
 module.exports.getUploadURL = async (event) => {
   const s3 = new AWS.S3();
-  const fileType =
-    event.queryStringParameters && event.queryStringParameters.file_type;
+  const fileExtension =
+    event.queryStringParameters && event.queryStringParameters.file_extension;
 
-  if (!fileType) {
+  if (!fileExtension) {
     return {
       statusCode: 400,
       body: JSON.stringify({
         error:
-          "Missing query parameter file_type. It must be a proper mime type.",
+          "Missing query parameter file_extension. It must be a proper file extension for a mime type.",
       }),
     };
   }
   const fileId = uuid.v4();
-  const fileName = `${fileId}.${mime.getExtension(fileType)}`;
+  const fileName = `${fileId}.${fileExtension}`;
   const params = {
     Bucket: "minlab-audio-transcript-input",
     Key: fileName,
     Expires: 900, // 15 minutes
-    ContentType: fileType,
+    ContentType: mime.getType(fileExtension),
   };
 
   try {
